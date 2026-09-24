@@ -96,6 +96,8 @@ five containers reach a healthy state together.
 
 ## License
 
+Copyright (c) 2026 Hany Samir ([hany.samir@gmail.com](mailto:hany.samir@gmail.com))
+
 Licensed under the [PolyForm Noncommercial License 1.0.0](LICENSE).
 In short: you're free to view, fork, modify, and reuse this code for
 any **noncommercial** purpose. Any commercial use - including selling
