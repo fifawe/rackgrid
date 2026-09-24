@@ -93,3 +93,12 @@ could not be exercised end-to-end here. What *was* verified directly:
 Before a real deployment, run `docker compose up --build` once against
 a real (or test) set of Linux hosts to confirm the images build and the
 five containers reach a healthy state together.
+
+## License
+
+Licensed under the [PolyForm Noncommercial License 1.0.0](LICENSE).
+In short: you're free to view, fork, modify, and reuse this code for
+any **noncommercial** purpose. Any commercial use - including selling
+the software itself, reselling a modified version, or using it (as-is
+or modified) inside a paid product or service - requires separate
+written permission from the copyright holder.
