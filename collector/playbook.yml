@@ -1,5 +1,5 @@
 ---
-# Linux Asset Inventory Platform - discovery playbook.
+# RackGrid - discovery playbook.
 #
 # Usage:
 #   ansible-playbook -i inventory/hosts.ini playbook.yml \

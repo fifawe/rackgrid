@@ -31,7 +31,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="Linux Asset Inventory Platform API",
+    title="RackGrid API",
     version="1.9.0",
     lifespan=lifespan,
 )

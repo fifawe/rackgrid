@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+**Project renamed to RackGrid.** The platform's default title (shown in the
+sidebar and on the login page until an admin customizes it in Settings), the
+API/scheduler/collector service titles, and the frontend package name all
+changed from "Asset Inventory Platform" to "RackGrid" ahead of the public
+GitHub release. No functional or API changes - `platform_title` remains
+admin-editable via the same `/settings/title` endpoint for anyone who wants
+a different name.
+
 ## 1.9.0 - 2026-09-23
 
 New reporting, data-migration, and account-management features requested

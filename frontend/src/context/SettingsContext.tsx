@@ -3,7 +3,7 @@ import { getPublicSettings } from "../api/settings";
 import { PublicSettings } from "../types";
 
 const DEFAULT_SETTINGS: PublicSettings = {
-  platform_title: "Asset Inventory Platform",
+  platform_title: "RackGrid",
   logo_url: null,
   version: "",
 };

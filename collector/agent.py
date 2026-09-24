@@ -24,7 +24,7 @@ COLLECTOR_DIR = os.environ.get("COLLECTOR_DIR", "/collector")
 INVENTORY_PATH = os.environ.get("COLLECTOR_INVENTORY", f"{COLLECTOR_DIR}/inventory/hosts.ini")
 PLAYBOOK_PATH = os.environ.get("COLLECTOR_PLAYBOOK", f"{COLLECTOR_DIR}/playbook.yml")
 
-app = FastAPI(title="Asset Inventory Collector Agent")
+app = FastAPI(title="RackGrid Collector Agent")
 
 # A simple lock prevents two overlapping ansible-playbook runs from
 # racing against the same inventory/managed hosts.

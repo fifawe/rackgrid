@@ -25,7 +25,7 @@ from app.infrastructure.storage import local_file_storage
 
 router = APIRouter(prefix="/settings", tags=["settings"])
 
-_DEFAULT_TITLE = "Asset Inventory Platform"
+_DEFAULT_TITLE = "RackGrid"
 _TITLE_KEY = "platform_title"
 _LOGO_FILENAME_KEY = "logo_stored_filename"
 _LOGO_CONTENT_TYPE_KEY = "logo_content_type"

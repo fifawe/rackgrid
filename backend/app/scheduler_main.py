@@ -93,7 +93,7 @@ async def lifespan(app: FastAPI):
         scheduler.shutdown(wait=False)
 
 
-app = FastAPI(title="Asset Inventory Scheduler", lifespan=lifespan)
+app = FastAPI(title="RackGrid Scheduler", lifespan=lifespan)
 
 
 class ScheduleRequest(BaseModel):

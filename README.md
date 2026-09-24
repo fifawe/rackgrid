@@ -1,9 +1,9 @@
-# Linux Asset Inventory Platform
+# RackGrid
 
-A containerized platform that discovers Linux servers via Ansible,
-tracks their current state, records change-only audit history, and
-lets you manage business metadata (owner, environment, support dates,
-etc.) through a React dashboard.
+A containerized Linux asset inventory platform that discovers servers
+via Ansible, tracks their current state, records change-only audit
+history, and lets you manage business metadata (owner, environment,
+support dates, etc.) through a React dashboard.
 
 Built per `PROJECT_SPEC.md` / `05_CLAUDE_CODE_IMPLEMENTATION_PROMPT.md`
 in the project's planning docs, following Clean Architecture
@@ -12,7 +12,7 @@ in the project's planning docs, following Clean Architecture
 ## Repository Layout
 
 ```
-asset-inventory/
+rackgrid/
   backend/      FastAPI + SQLAlchemy (async) + Alembic, Clean Architecture
   frontend/     React + TypeScript + Material UI
   collector/    Ansible roles/playbook + a small HTTP trigger agent

@@ -169,7 +169,7 @@ async def test_public_settings_default_title_and_no_logo(app_client):
     resp = await app_client.get("/api/v1/settings/public")
     assert resp.status_code == 200
     body = resp.json()
-    assert body["platform_title"] == "Asset Inventory Platform"
+    assert body["platform_title"] == "RackGrid"
     assert body["logo_url"] is None
     assert body["version"]
 
