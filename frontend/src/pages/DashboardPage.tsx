@@ -160,7 +160,7 @@ export default function DashboardPage() {
       <Box sx={{ mb: 3, display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
         <Box>
           <Typography variant="h4" sx={{ fontWeight: 700 }}>
-            Dashboard
+            {settings.platform_title} Dashboard
           </Typography>
           <Typography variant="body2" color="text.secondary">
             A live view of every server tracked in the inventory
