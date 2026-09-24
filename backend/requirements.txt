@@ -1,0 +1,18 @@
+fastapi==0.115.0
+uvicorn[standard]==0.30.6
+sqlalchemy==2.0.35
+alembic==1.13.2
+asyncmy==0.2.9
+pydantic==2.9.2
+pydantic-settings==2.5.2
+python-jose[cryptography]==3.3.0
+bcrypt==4.2.0
+python-multipart==0.0.9
+apscheduler==3.10.4
+httpx==0.27.2
+python-dotenv==1.0.1
+structlog==24.4.0
+# Pure-Python IANA zoneinfo database - guarantees zoneinfo.ZoneInfo(...)
+# (used to localize the scheduler's cron interpretation) resolves real
+# zone names even if the base image has no OS-level tzdata package.
+tzdata==2024.2

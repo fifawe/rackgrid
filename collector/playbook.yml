@@ -1,0 +1,34 @@
+---
+# Linux Asset Inventory Platform - discovery playbook.
+#
+# Usage:
+#   ansible-playbook -i inventory/hosts.ini playbook.yml \
+#     -e backend_base_url=http://backend:8000 \
+#     -e collector_run_id=42
+#
+# Each host in the inventory is discovered independently; a failure on
+# one host does not stop discovery of the others (see
+# `any_errors_fatal: false` / the collector agent's per-host handling).
+
+- name: Discover Linux asset inventory
+  hosts: linux_servers
+  gather_facts: true
+  any_errors_fatal: false
+  # backend_base_url / collector_api_key / collector_run_id are NOT
+  # redeclared here. group_vars/all.yml already provides their defaults,
+  # and `-e name=value` on the CLI (what the collector agent/scheduler
+  # use) overrides those - Ansible's normal variable precedence handles
+  # this correctly. Redeclaring `name: "{{ name | default(...) }}"` in
+  # play vars looks harmless but is self-referential: it only works by
+  # accident when an extra-var is supplied (which short-circuits the
+  # template entirely), and infinite-recurses ("maximum recursion depth
+  # exceeded") the moment one isn't - e.g. exactly the standalone usage
+  # in collector/README.md, which never passes -e collector_run_id.
+
+  roles:
+    - gather_hardware
+    - gather_os
+    - gather_network
+    - gather_storage
+    - build_payload
+    - submit_payload

@@ -1,0 +1,32 @@
+---
+# Overridden at runtime via `-e backend_base_url=... -e collector_run_id=...`
+# by the scheduler/collector agent, but sensible defaults keep the
+# playbook runnable standalone for testing.
+backend_base_url: "http://backend:8000"
+collector_api_key: "{{ lookup('env', 'COLLECTOR_API_KEY') | default('change_me_collector_api_key', true) }}"
+collector_run_id: null
+
+# Placeholder values BIOS/hypervisor vendors report when no real serial
+# was ever configured. Seen in practice on unconfigured KVM/QEMU/Proxmox
+# guests especially - `dmidecode -s system-serial-number` on those
+# commonly returns the literal string "Not Specified", identically, on
+# every VM cloned from the same template. gather_hardware treats any of
+# these as "no serial available" (empty string) rather than a real,
+# unique identifier - letting one through as a real serial makes the
+# backend's AssetMatchingService (serial number matches first, before
+# primary IP or hostname) merge every VM that reports it into a single
+# asset record, each discovery overwriting the last one's data.
+# Override this list (e.g. in an inventory group_vars file) if your
+# fleet's BIOS/hypervisor uses a different generic placeholder.
+collector_invalid_serial_values:
+  - ""
+  - "NA"
+  - "N/A"
+  - "Not Specified"
+  - "Not Applicable"
+  - "None"
+  - "Default string"
+  - "System Serial Number"
+  - "To Be Filled By O.E.M."
+  - "0000000000"
+  - "Unknown"

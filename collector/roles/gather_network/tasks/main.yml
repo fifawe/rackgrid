@@ -1,0 +1,29 @@
+---
+# gather_network - collects the primary IP and all interfaces/MACs, per
+# PROJECT_SPEC.md > Network Collection.
+
+- name: Build interface list from ansible_facts
+  ansible.builtin.set_fact:
+    collector_network: "{{ collector_network | default([]) + [item_entry] }}"
+  loop: "{{ ansible_facts.interfaces | default([]) }}"
+  vars:
+    iface_facts: "{{ ansible_facts[item.replace('-', '_')] | default({}) }}"
+    item_entry:
+      interface_name: "{{ item }}"
+      ip_address: "{{ iface_facts.ipv4.address | default(None) }}"
+      mac_address: "{{ iface_facts.macaddress | default(None) }}"
+  when: >-
+    item != 'lo'
+    and (ansible_facts[item.replace('-', '_')] | default({})).get('ipv4') is not none
+
+- name: Set collector_primary_ip fact
+  ansible.builtin.set_fact:
+    collector_primary_ip: "{{ ansible_facts.default_ipv4.address }}"
+  # `omit` can't be used here: with only one key in the dict, omitting it
+  # leaves zero key/value pairs, which set_fact rejects outright ("No
+  # key/value pairs provided") - it fails the whole play on any host
+  # with no detected default route, not just this sandbox. Skipping the
+  # task entirely when the fact is missing instead, and letting
+  # build_payload's `collector_primary_ip | default(None)` fall back,
+  # avoids that.
+  when: (ansible_facts.default_ipv4 | default({})).address is defined

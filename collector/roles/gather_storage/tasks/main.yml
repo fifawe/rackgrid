@@ -1,0 +1,55 @@
+---
+# gather_storage - collects mounted storage devices, per
+# PROJECT_SPEC.md > Storage Collection ("Use: Ansible facts, lsblk
+# fallback").
+
+- name: Initialize collector_storage
+  ansible.builtin.set_fact:
+    collector_storage: []
+
+- name: Build storage list from ansible_facts.mounts
+  ansible.builtin.set_fact:
+    collector_storage: "{{ collector_storage + [entry] }}"
+  loop: "{{ ansible_facts.mounts | default([]) }}"
+  loop_control:
+    label: "{{ item.device | default('unknown') }}"
+  vars:
+    entry:
+      device_name: "{{ item.device }}"
+      filesystem_type: "{{ item.fstype | default('unknown') }}"
+      mount_point: "{{ item.mount }}"
+      capacity_gb: "{{ ((item.size_total | default(0) | int) / (1024 ** 3)) | round(2) }}"
+  when: item.device is defined and item.mount is defined
+
+- name: Fallback to lsblk when ansible_facts.mounts produced nothing
+  ansible.builtin.command: lsblk -J -b -o NAME,FSTYPE,MOUNTPOINT,SIZE
+  register: lsblk_output
+  changed_when: false
+  failed_when: false
+  when: (collector_storage | length) == 0
+
+- name: Parse lsblk JSON output
+  ansible.builtin.set_fact:
+    lsblk_devices: "{{ (lsblk_output.stdout | from_json).blockdevices | default([]) }}"
+  when:
+    - lsblk_output is defined
+    - lsblk_output.stdout is defined
+    - lsblk_output.stdout | length > 0
+    - (collector_storage | length) == 0
+
+- name: Build storage list from lsblk as a last resort
+  ansible.builtin.set_fact:
+    collector_storage: "{{ collector_storage + [entry] }}"
+  loop: "{{ lsblk_devices | default([]) }}"
+  loop_control:
+    label: "{{ item.name | default('unknown') }}"
+  vars:
+    entry:
+      device_name: "/dev/{{ item.name }}"
+      filesystem_type: "{{ item.fstype | default('unknown') }}"
+      mount_point: "{{ item.mountpoint }}"
+      capacity_gb: "{{ ((item.size | default(0) | int) / (1024 ** 3)) | round(2) }}"
+  when:
+    - lsblk_devices is defined
+    - item.mountpoint is defined
+    - item.mountpoint | default('') != ''

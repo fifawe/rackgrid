@@ -1,0 +1,48 @@
+---
+# gather_hardware - collects hostname, serial number, manufacturer,
+# model, CPU, and RAM facts, per PROJECT_SPEC.md > Hardware Collection.
+#
+# Ansible's `setup` module (gathered automatically by the play) already
+# provides most of this via DMI/SMBIOS facts. Where a fact is missing
+# (common on some virtualization platforms or minimal images) we fall
+# back to `dmidecode`.
+
+- name: Ensure hardware facts were gathered
+  ansible.builtin.setup:
+    gather_subset:
+      - hardware
+  when: ansible_facts.product_serial is not defined
+
+- name: Fall back to dmidecode for serial number if needed
+  ansible.builtin.command: dmidecode -s system-serial-number
+  register: dmidecode_serial
+  changed_when: false
+  failed_when: false
+  become: true
+  when: ansible_facts.product_serial is not defined or ansible_facts.product_serial in collector_invalid_serial_values
+
+- name: Set collector_hardware fact
+  ansible.builtin.set_fact:
+    collector_hardware:
+      manufacturer: "{{ ansible_facts.system_vendor | default('Unknown', true) }}"
+      model: "{{ ansible_facts.product_name | default('Unknown', true) }}"
+      cpu_model: "{{ ansible_facts.processor | default([]) | last | default('Unknown', true) }}"
+      cpu_count: "{{ ansible_facts.processor_count | default(1) }}"
+      cpu_cores: "{{ ansible_facts.processor_cores | default(1) }}"
+      cpu_threads: "{{ (ansible_facts.processor_cores | default(1) | int) * (ansible_facts.processor_threads_per_core | default(1) | int) }}"
+      ram_gb: "{{ (ansible_facts.memtotal_mb | default(0) | int / 1024) | round(2) }}"
+    # The SAME placeholder-exclusion list is applied to BOTH sources here
+    # - the original bug only filtered ansible_facts.product_serial and
+    # let an equally-generic dmidecode fallback value straight through
+    # unfiltered, which is exactly what let colliding VMs match each
+    # other. A serial that isn't real/unique renders as an EMPTY string,
+    # which AssetMatchingService correctly treats as "no serial" and
+    # falls through to primary IP / hostname matching instead.
+    collector_serial_number: >-
+      {{
+        (ansible_facts.product_serial | trim)
+        if (ansible_facts.product_serial is defined and (ansible_facts.product_serial | trim) not in collector_invalid_serial_values)
+        else ((dmidecode_serial.stdout | default('') | trim)
+              if ((dmidecode_serial.stdout | default('') | trim) not in collector_invalid_serial_values)
+              else '')
+      }}

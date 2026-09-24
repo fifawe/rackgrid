@@ -1,0 +1,23 @@
+---
+# build_payload - assembles the JSON discovery payload from the facts
+# set by gather_hardware / gather_os / gather_network / gather_storage,
+# matching the schema in PROJECT_SPEC.md > Discovery Payload
+# Specification exactly.
+
+- name: Assemble discovery_payload
+  ansible.builtin.set_fact:
+    discovery_payload:
+      hostname: "{{ ansible_facts.hostname | default(inventory_hostname) }}"
+      serial_number: "{{ collector_serial_number | default(None) }}"
+      primary_ip: "{{ collector_primary_ip | default(None) }}"
+      hardware: "{{ collector_hardware | default({}) }}"
+      os: "{{ collector_os | default({}) }}"
+      virtualization: "{{ collector_virtualization | default({}) }}"
+      storage: "{{ collector_storage | default([]) }}"
+      network: "{{ collector_network | default([]) }}"
+      collector_run_id: "{{ collector_run_id | default(None) }}"
+
+- name: Show assembled payload (debug)
+  ansible.builtin.debug:
+    var: discovery_payload
+    verbosity: 1

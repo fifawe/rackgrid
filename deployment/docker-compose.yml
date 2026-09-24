@@ -1,0 +1,126 @@
+x-backend-env: &backend-env
+  APP_ENV: ${APP_ENV:-production}
+  LOG_LEVEL: ${LOG_LEVEL:-INFO}
+  TZ: ${TZ:-UTC}
+  DB_HOST: mariadb
+  DB_PORT: 3306
+  DB_USER: ${DB_USER:-asset_inventory}
+  DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
+  DB_NAME: ${DB_NAME:-asset_inventory}
+  SECRET_KEY: ${SECRET_KEY:?SECRET_KEY is required}
+  ALGORITHM: HS256
+  ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-60}
+  COLLECTOR_API_KEY: ${COLLECTOR_API_KEY:?COLLECTOR_API_KEY is required}
+  CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost}
+  SCHEDULER_ENABLED: ${SCHEDULER_ENABLED:-true}
+  DEFAULT_COLLECTOR_CRON: ${DEFAULT_COLLECTOR_CRON:-0 2 * * *}
+  ACTIVE_THRESHOLD_DAYS: ${ACTIVE_THRESHOLD_DAYS:-7}
+  OFFLINE_THRESHOLD_DAYS: ${OFFLINE_THRESHOLD_DAYS:-30}
+  UPLOAD_DIR: /app/uploads
+
+services:
+  mariadb:
+    image: mariadb:11.4
+    container_name: asset-inventory-mariadb
+    restart: unless-stopped
+    environment:
+      TZ: ${TZ:-UTC}
+      MARIADB_DATABASE: ${DB_NAME:-asset_inventory}
+      MARIADB_USER: ${DB_USER:-asset_inventory}
+      MARIADB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?DB_ROOT_PASSWORD is required}
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    ports:
+      - "${DB_EXPOSED_PORT:-3306}:3306"
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - asset-inventory-net
+
+  backend:
+    build:
+      context: ../backend
+    container_name: asset-inventory-backend
+    restart: unless-stopped
+    environment:
+      <<: *backend-env
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    ports:
+      - "${BACKEND_EXPOSED_PORT:-8000}:8000"
+    volumes:
+      # Asset design-document attachments and the uploaded platform logo
+      # - without this, both are lost on every container recreate.
+      - backend_uploads:/app/uploads
+    networks:
+      - asset-inventory-net
+
+  scheduler:
+    build:
+      context: ../backend
+    container_name: asset-inventory-scheduler
+    restart: unless-stopped
+    command: ["uvicorn", "app.scheduler_main:app", "--host", "0.0.0.0", "--port", "9000"]
+    environment:
+      <<: *backend-env
+      RUN_MIGRATIONS: "false"
+      BACKEND_BASE_URL: http://backend:8000
+      COLLECTOR_BASE_URL: http://collector:9100
+    depends_on:
+      mariadb:
+        condition: service_healthy
+      backend:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/internal/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    networks:
+      - asset-inventory-net
+
+  collector:
+    build:
+      context: ../collector
+    container_name: asset-inventory-collector
+    restart: unless-stopped
+    environment:
+      TZ: ${TZ:-UTC}
+      COLLECTOR_API_KEY: ${COLLECTOR_API_KEY:?COLLECTOR_API_KEY is required}
+    volumes:
+      # Mount a real inventory/SSH key from the host without rebuilding
+      # the image every time the target server list changes.
+      - ../collector/inventory:/collector/inventory:ro
+    ports:
+      - "${COLLECTOR_EXPOSED_PORT:-9100}:9100"
+    networks:
+      - asset-inventory-net
+
+  frontend:
+    build:
+      context: ../frontend
+    container_name: asset-inventory-frontend
+    restart: unless-stopped
+    environment:
+      TZ: ${TZ:-UTC}
+    depends_on:
+      - backend
+    ports:
+      - "${FRONTEND_EXPOSED_PORT:-80}:80"
+    networks:
+      - asset-inventory-net
+
+networks:
+  asset-inventory-net:
+    driver: bridge
+
+volumes:
+  mariadb_data:
+  backend_uploads:

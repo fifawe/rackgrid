@@ -1,0 +1,35 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
+
+node_modules/
+build/
+dist/
+*.tsbuildinfo
+
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.log
+
+.DS_Store
+.vscode/
+.idea/
+
+# Local file storage for asset attachments / platform logo (see
+# infrastructure/storage/local_file_storage.py, UPLOAD_DIR setting) -
+# real uploaded files must never be committed.
+/backend/uploads/
+uploads/
+
+# Local databases some contributors may create while running the
+# backend outside Docker.
+*.db
+*.sqlite
+*.sqlite3

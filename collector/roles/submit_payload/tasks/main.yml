@@ -1,0 +1,23 @@
+---
+# submit_payload - POSTs the discovery payload to the backend's
+# ingestion endpoint (POST /api/v1/discovery), authenticating with the
+# shared collector API key (machine-to-machine, not a user JWT).
+
+- name: Submit discovery payload to backend
+  ansible.builtin.uri:
+    url: "{{ backend_base_url }}/api/v1/discovery"
+    method: POST
+    body_format: json
+    body: "{{ discovery_payload }}"
+    headers:
+      X-Collector-Api-Key: "{{ collector_api_key }}"
+    status_code: [200, 201]
+    timeout: 30
+  register: submit_result
+  delegate_to: localhost
+  become: false
+
+- name: Report submission result
+  ansible.builtin.debug:
+    msg: "Submitted {{ discovery_payload.hostname }} -> asset_id={{ submit_result.json.asset_id }}"
+    verbosity: 1

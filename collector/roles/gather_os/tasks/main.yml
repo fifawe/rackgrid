@@ -1,0 +1,30 @@
+---
+# gather_os - collects distribution, version, kernel, architecture and
+# uptime, per PROJECT_SPEC.md > OS Collection. Also derives the
+# virtualization role/hypervisor for the Infrastructure section.
+
+- name: Read system uptime
+  ansible.builtin.slurp:
+    src: /proc/uptime
+  register: proc_uptime
+  failed_when: false
+
+- name: Set collector_os fact
+  ansible.builtin.set_fact:
+    collector_os:
+      distribution: "{{ ansible_facts.distribution | default('Unknown', true) }}"
+      version: "{{ ansible_facts.distribution_version | default('Unknown', true) }}"
+      kernel: "{{ ansible_facts.kernel | default('Unknown', true) }}"
+      architecture: "{{ ansible_facts.architecture | default('Unknown', true) }}"
+      uptime_seconds: >-
+        {{
+          (proc_uptime.content | b64decode).split()[0] | float | round | int
+          if (proc_uptime is defined and proc_uptime.content is defined)
+          else (ansible_facts.uptime_seconds | default(0))
+        }}
+
+- name: Set collector_virtualization fact
+  ansible.builtin.set_fact:
+    collector_virtualization:
+      role: "{{ ansible_facts.virtualization_role | default('physical', true) }}"
+      hypervisor: "{{ ansible_facts.virtualization_type | default('none', true) }}"
