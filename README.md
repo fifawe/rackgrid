@@ -9,6 +9,20 @@ Built per `PROJECT_SPEC.md` / `05_CLAUDE_CODE_IMPLEMENTATION_PROMPT.md`
 in the project's planning docs, following Clean Architecture
 (Domain / Application / Infrastructure / API) on the backend.
 
+## Screenshots
+
+![RackGrid dashboard](docs/screenshots/dashboard.png)
+
+| | |
+|---|---|
+| **Asset inventory** - search, filter, bulk edit, CSV export<br>![Inventory](docs/screenshots/inventory.png) | **Asset details** - hardware, OS, storage, network<br>![Asset details](docs/screenshots/asset-details.png) |
+| **Business metadata** - owner, site, rack, support dates<br>![Business metadata](docs/screenshots/business-metadata.png) | **Audit history** - change-only, old vs. new value<br>![Audit history](docs/screenshots/audit-history.png) |
+| **Job management** - scheduled and on-demand discovery<br>![Jobs](docs/screenshots/jobs.png) | **Import / Export** - ZIP export, bulk CSV import<br>![Import / Export](docs/screenshots/import-export.png) |
+| **Sites**<br>![Sites](docs/screenshots/sites.png) | **Support teams**<br>![Support teams](docs/screenshots/support-teams.png) |
+| **Dark mode**<br>![Dark mode](docs/screenshots/dashboard-dark.png) | **Settings** - password, theme, branding<br>![Settings](docs/screenshots/settings.png) |
+
+<sub>Screenshots use generated demo data.</sub>
+
 ## Repository Layout
 
 ```
